@@ -5,7 +5,7 @@
 		<style type="text/css">
 			body{
 				font-family: sans-serif;
-			}
+			}	
 			#shape{
 				width: 200px;
 				height: 200px;
@@ -24,20 +24,44 @@
 		<p>Click on the boxes and squares as quickly as you can!</p>
 		<p class="bold">Your time: <span id="timeTaken"></p>
 		<p class="bold">Best score: <span id="bestScore"></p>
-
-		<div id="shape"></div>
+	
+        <div id="shape"></div>
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
 
 		<script type="text/javascript">
 			var start = new Date().getTime();
 			var highScore = Number.MAX_SAFE_INTEGER;
 			var size = 500;
+            var getHsUrl = "http://localhost:8081/highscore" // For local running
+            var getSizeUrl = "http://localhost:8081/size"
+            var setScore = "http://localhost:8081/score"
+            var setHsUrl = "http://localhost:8081/highscore"
 
 			function makeShapeAppear(){
+
+                $.ajax({
+                    url: getHsUrl,
+                    dataType: "jsonp",
+                    success: function(data) {
+                        highScore = data.hs
+                        document.getElementById("bestScore").innerHTML = highScore + "s";
+                    }
+                })
+
+                $.ajax({
+                    url: getSizeUrl,
+                    dataType: "jsonp",
+                    success: function(data) {
+                        size = data.size
+                    }
+                })
+
 				var top = Math.random()*size;
 				var left = Math.random()*size;
 				var width = Math.random()*size/2 + 100;
 				if(Math.random() > 0.5){
-					document.getElementById("shape").style.borderRadius = "50%";	// Circle
+					document.getElementById("shape").style.borderRadius = "50%";	// Circle			
 				} else {
 					document.getElementById("shape").style.borderRadius = "0"; // Square
 				}
@@ -60,12 +84,31 @@
 			document.getElementById("shape").onclick = function(){
 				document.getElementById("shape").style.display = "none";
 				var end = new Date().getTime();
-				var timeTaken = (end-start)/1000;
-				document.getElementById("timeTaken").innerHTML=timeTaken + "s" ;
+				var timeTaken = (end-start)/1000; 
+				document.getElementById("timeTaken").innerHTML=timeTaken + "s" ; 
 				if (timeTaken < highScore) {
                     highScore = timeTaken;
                     document.getElementById("bestScore").innerHTML = highScore + "s";
+                    setHsUrl = getHsUrl + timeTaken;
+                    $.ajax({
+                        url: setHsUrl,
+                        dataType: "jsonp",
+                        success: function(data) {
+                            highScore = data.hs
+                            document.getElementById("bestScore").innerHTML = highScore + "s";
+                        }
+                    })
 				}
+                setScore = setScore + timeTaken;
+                $.ajax({
+                    url: setScore,
+                    dataType: "jsonp",
+                    success: function(data) {
+                    }
+                })
+
+
+
 				appearAfterDelay();
 			}
             function getRandomColor() {
