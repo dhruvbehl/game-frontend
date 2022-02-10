@@ -33,18 +33,19 @@
 			var start = new Date().getTime();
 			var highScore = Number.MAX_SAFE_INTEGER;
 			var size = 500;
-            var getHsUrl = "http://localhost:8081/highscore" // For local running
-            var getSizeUrl = "http://localhost:8081/size"
-            var setScore = "http://localhost:8081/score"
-            var setHsUrl = "http://localhost:8081/highscore"
+            var getHsUrl = "http://localhost:8080/geths"
+            var getSizeUrl = "http://localhost:8080/getsize"
+            var setScore = "http://localhost:8080/setscore"
+            var setHsUrl = "http://localhost:8080/seths"
 
+			
 			function makeShapeAppear(){
 
                 $.ajax({
                     url: getHsUrl,
                     dataType: "jsonp",
                     success: function(data) {
-                        highScore = data.hs
+                        highScore = data.highscore
                         document.getElementById("bestScore").innerHTML = highScore + "s";
                     }
                 })
@@ -75,11 +76,11 @@
 				document.getElementById("shape").style.backgroundColor= getRandomColor();
 				start = new Date().getTime();
 			}
-
+			
 			function appearAfterDelay(){
 				setTimeout(makeShapeAppear, Math.random()*2000);
 			}
-
+			
 			appearAfterDelay();
 			document.getElementById("shape").onclick = function(){
 				document.getElementById("shape").style.display = "none";
@@ -89,21 +90,22 @@
 				if (timeTaken < highScore) {
                     highScore = timeTaken;
                     document.getElementById("bestScore").innerHTML = highScore + "s";
-                    setHsUrl = getHsUrl + timeTaken;
-                    $.ajax({
+                    setHsUrl = "http://localhost:8080/seths/" + timeTaken;
+                    $.post({
                         url: setHsUrl,
                         dataType: "jsonp",
                         success: function(data) {
-                            highScore = data.hs
+                            highScore = data.highscore
                             document.getElementById("bestScore").innerHTML = highScore + "s";
                         }
                     })
 				}
-                setScore = setScore + timeTaken;
-                $.ajax({
+                setScore = "http://localhost:8080/setscore/" + timeTaken;
+                $.post({
                     url: setScore,
                     dataType: "jsonp",
                     success: function(data) {
+                       
                     }
                 })
 
